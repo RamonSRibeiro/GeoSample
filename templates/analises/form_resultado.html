@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-11">
+        <div class="d-flex justify-content-between align-items-end mb-3">
+            <div>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-1" style="font-size: 0.7rem; text-transform: uppercase;">
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}" class="text-muted">Custódia</a></li>
+                        <li class="breadcrumb-item active text-primary">Lançamento Analítico</li>
+                    </ol>
+                </nav>
+                <h2 class="fw-bold m-0 h4">Amostra: <span class="font-monospace text-accent">{{ amostra.codigo_rastreio }}</span></h2>
+            </div>
+            <div class="text-end">
+                <span class="badge bg-dark-subtle border border-secondary-subtle text-muted fw-normal px-3 py-2">
+                    ESTÁGIO: {{ amostra.get_status_display|upper }}
+                </span>
+            </div>
+        </div>
+
+        <div class="card card-scientific shadow-lg border-top border-primary border-4">
+            <div class="card-body p-4">
+                
+                {% if resultado.fechado %}
+                    <div class="alert bg-danger-subtle border-danger-subtle text-danger d-flex align-items-center mb-4">
+                        <i class="bi bi-lock-fill me-3 h4 mb-0"></i>
+                        <div>
+                            <strong class="d-block">REGISTRO BLOQUEADO (AUDITORIA)</strong>
+                            <small>Este laudo foi fechado digitalmente. Alterações requerem privilégios de administrador.</small>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <form method="POST" class="{% if resultado.fechado %}opacity-75 pe-none{% endif %}">
+                    {% csrf_token %}
+                    
+                    <div class="mb-5">
+                        <div class="d-flex align-items-center mb-3">
+                            <h6 class="text-uppercase fw-bold m-0 text-primary-emphasis" style="font-size: 0.75rem; letter-spacing: 1px;">
+                                Complexo de Troca e Acidez (cmolc/dm³)
+                            </h6>
+                            <div class="flex-grow-1 ms-3 border-bottom border-secondary-subtle"></div>
+                        </div>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-2">
+                                <label class="form-label small fw-bold text-muted">P (Fósforo)</label>
+                                {{ form.p }}
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small fw-bold text-muted">K (Potássio)</label>
+                                {{ form.k }}
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small fw-bold text-muted">Ca (Cálcio)</label>
+                                {{ form.ca }}
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small fw-bold text-muted">Mg (Magnésio)</label>
+                                {{ form.mg }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-muted">H+Al (Acidez Potencial)</label>
+                                {{ form.h_al }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-5">
+                        <div class="d-flex align-items-center mb-3">
+                            <h6 class="text-uppercase fw-bold m-0 text-primary-emphasis" style="font-size: 0.75rem; letter-spacing: 1px;">
+                                Frações Granulométricas (%)
+                            </h6>
+                            <div class="flex-grow-1 ms-3 border-bottom border-secondary-subtle"></div>
+                        </div>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-muted">Argila</label>
+                                <div class="input-group input-group-sm">{{ form.argila }}<span class="input-group-text bg-dark border-secondary-subtle">%</span></div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-muted">Silte</label>
+                                <div class="input-group input-group-sm">{{ form.silte }}<span class="input-group-text bg-dark border-secondary-subtle">%</span></div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-muted">Areia</label>
+                                <div class="input-group input-group-sm">{{ form.areia }}<span class="input-group-text bg-dark border-secondary-subtle">%</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if resultado.pk %}
+                    <div class="card bg-dark-subtle border-secondary-subtle mb-4">
+                        <div class="card-body py-3">
+                            <div class="row text-center g-0">
+                                <div class="col-md-4 border-end border-secondary-subtle">
+                                    <small class="text-muted text-uppercase d-block mb-1" style="font-size: 0.6rem;">Soma de Bases (SB)</small>
+                                    <span class="h5 fw-bold text-light font-monospace">{{ resultado.soma_bases|floatformat:2 }}</span>
+                                </div>
+                                <div class="col-md-4 border-end border-secondary-subtle">
+                                    <small class="text-muted text-uppercase d-block mb-1" style="font-size: 0.6rem;">Capacidade Troca (CTC)</small>
+                                    <span class="h5 fw-bold text-light font-monospace">{{ resultado.ctc|floatformat:2 }}</span>
+                                </div>
+                                <div class="col-md-4">
+                                    <small class="text-muted text-uppercase d-block mb-1" style="font-size: 0.6rem;">Saturação (V%)</small>
+                                    <span class="h5 fw-bold {% if resultado.v_porcento < 50 %}text-warning{% else %}text-success{% endif %} font-monospace">
+                                        {{ resultado.v_porcento|floatformat:1 }}%
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <a href="{% url 'lista_amostras' %}" class="btn btn-sm btn-outline-secondary border-secondary-subtle px-4">
+                            <i class="bi bi-arrow-left me-2"></i>VOLTAR À LISTA
+                        </a>
+                        <div class="d-flex gap-2">
+                            {% if not resultado.fechado %}
+                                <button type="submit" class="btn btn-sm btn-primary px-5 fw-bold shadow">
+                                    <i class="bi bi-cpu-fill me-2"></i>SALVAR E CALCULAR
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="mt-4 p-3 border-start border-primary border-4 bg-dark-subtle rounded-end">
+            <small class="text-muted d-flex align-items-center">
+                <i class="bi bi-info-circle me-2"></i>
+                Os cálculos de CTC e V% são realizados no servidor (Backend) utilizando fórmulas agronômicas padronizadas pela Embrapa.
+            </small>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Estilo para inputs de resultados (foco em digitação numérica) */
+    input[type="number"], input[type="text"] {
+        background-color: #0d1117 !important;
+        border: 1px solid #30363d !important;
+        color: #58a6ff !important; /* Azul "Digital" para dados inseridos */
+        font-family: var(--font-mono) !important;
+        text-align: center;
+        font-weight: bold;
+    }
+    input:focus {
+        border-color: var(--accent-primary) !important;
+        box-shadow: 0 0 0 0.2rem rgba(88, 166, 255, 0.15) !important;
+    }
+    .input-group-text {
+        font-size: 0.7rem !important;
+        font-weight: bold;
+        color: #8b949e;
+    }
+</style>
+{% endblock %}

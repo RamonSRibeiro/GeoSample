@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}" class="text-muted text-decoration-none">Dashboard</a></li>
+                <li class="breadcrumb-item text-muted" aria-current="page">Cadastro Geográfico</li>
+                <li class="breadcrumb-item active text-primary" aria-current="page">Novo Talhão</li>
+            </ol>
+        </nav>
+
+        <div class="card card-scientific shadow-lg">
+            <div class="card-header py-3">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-bounding-box-circles me-2 text-primary"></i>
+                    <span class="text-uppercase fw-bold" style="font-size: 0.85rem; letter-spacing: 0.5px;">
+                        Definição de Unidade de Manejo (Talhão/Gleba)
+                    </span>
+                </div>
+            </div>
+            
+            <div class="card-body p-4">
+                <form method="POST" class="needs-validation">
+                    {% csrf_token %}
+                    
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-7">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Unidade de Produção (Fazenda)</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-dark-subtle border-secondary-subtle"><i class="bi bi-geo"></i></span>
+                                {{ form.fazenda }}
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Identificador Técnico</label>
+                            {{ form.codigo_talhao }}
+                            <div class="form-text" style="font-size: 0.7rem;">Ex: TAL-01, GLEBA-A</div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Extensão Territorial (ha)</label>
+                        <div class="input-group input-group-sm w-50">
+                            {{ form.area_hectares }}
+                            <span class="input-group-text bg-dark-subtle border-secondary-subtle">Hectares</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Histórico de Manejo e Cultura</label>
+                        {{ form.historico_manejo }}
+                        <div class="form-text d-flex align-items-center mt-2" style="font-size: 0.75rem;">
+                            <i class="bi bi-info-circle me-1 text-info"></i> 
+                            Dados essenciais para correlação e recomendações de fertilidade.
+                        </div>
+                    </div>
+
+                    <hr class="border-secondary-subtle my-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="{% url 'dashboard' %}" class="btn btn-sm btn-link text-muted text-decoration-none uppercase-tracking">
+                            <i class="bi bi-arrow-left me-1"></i> Descartar
+                        </a>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-sm btn-primary px-4 fw-bold shadow-sm">
+                                <i class="bi bi-check2-square me-1"></i> Finalizar Registro
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="mt-4 p-3 rounded bg-dark-subtle border border-secondary-subtle">
+            <small class="text-muted d-flex align-items-start">
+                <i class="bi bi-shield-check me-2 text-success"></i>
+                Os dados geográficos inseridos serão processados pela extensão PostGIS para garantir a integridade espacial da amostra dentro do perímetro do talhão.
+            </small>
+        </div>
+    </div>
+</div>
+{% endblock %}

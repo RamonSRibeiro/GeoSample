@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb" style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px;">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}" class="text-muted text-decoration-none">Início</a></li>
+                <li class="breadcrumb-item active text-primary" aria-current="page">Nova Unidade Geográfica</li>
+            </ol>
+        </nav>
+
+        <div class="card card-scientific shadow-lg">
+            <div class="card-header py-3 d-flex align-items-center">
+                <i class="bi bi-building-gear me-2 text-primary"></i>
+                <span class="text-uppercase fw-bold" style="font-size: 0.85rem; letter-spacing: 0.5px;">
+                    Cadastro de Propriedade Raiz
+                </span>
+            </div>
+            
+            <div class="card-body p-4">
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Nome da Propriedade / Razão Social</label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-dark-subtle border-secondary-subtle"><i class="bi bi-tag"></i></span>
+                            {{ form.nome }}
+                        </div>
+                        <div class="form-text" style="font-size: 0.7rem;">Nome identificador para relatórios e laudos.</div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-9">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Município</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-dark-subtle border-secondary-subtle"><i class="bi bi-map"></i></span>
+                                {{ form.municipio }}
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold text-muted text-uppercase">UF</label>
+                            {{ form.estado }}
+                        </div>
+                    </div>
+
+                    <div class="p-3 mb-4 rounded bg-dark-subtle border border-secondary-subtle">
+                        <p class="small text-muted m-0">
+                            <i class="bi bi-info-circle-fill me-2 text-info"></i>
+                            Esta propriedade servirá como o container principal para talhões e pontos de coleta georreferenciados.
+                        </p>
+                    </div>
+
+                    <hr class="border-secondary-subtle my-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="{% url 'dashboard' %}" class="btn btn-sm btn-link text-muted text-decoration-none small">
+                            <i class="bi bi-x-lg me-1"></i> DESCARTAR
+                        </a>
+                        <button type="submit" class="btn btn-sm btn-primary px-4 fw-bold shadow-sm">
+                            <i class="bi bi-save2 me-2"></i> REGISTRAR UNIDADE
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Injeção de estilo para campos gerados pelo Django Form */
+    input[type="text"], select, textarea {
+        display: block;
+        width: 100%;
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+        font-weight: 400;
+        line-height: 1.5;
+        color: var(--text-main) !important;
+        background-color: var(--bg-base) !important;
+        background-clip: padding-box;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 4px !important;
+        transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    }
+
+    input:focus, select:focus {
+        border-color: var(--accent-primary) !important;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(88, 166, 255, 0.15) !important;
+    }
+
+    .breadcrumb-item + .breadcrumb-item::before {
+        color: var(--text-muted);
+    }
+</style>
+{% endblock %}

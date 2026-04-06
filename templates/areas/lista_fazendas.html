@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="row mb-4 align-items-center">
+    <div class="col-md-7">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-1" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;">
+          <li class="breadcrumb-item">
+            <a href="{% url 'dashboard' %}" class="text-muted text-decoration-none">Início</a>
+          </li>
+          <li class="breadcrumb-item active text-success" aria-current="page">Log de Propriedades</li>
+        </ol>
+      </nav>
+      <h2 class="fw-bold m-0 text-light">Gestão de Propriedades Rurais</h2>
+      <p class="text-muted small mb-0">Monitoramento de fazendas e unidades de extração base</p>
+    </div>
+    <div class="col-md-5 text-end">
+      <a href="{% url 'nova_fazenda' %}" class="btn btn-sm btn-success px-3 fw-bold shadow-sm"><i class="bi bi-plus-circle me-2"></i>REGISTRAR UNIDADE</a>
+    </div>
+  </div>
+
+  <div class="card card-scientific shadow-lg">
+    <div class="card-header bg-dark-subtle py-3 border-bottom border-secondary-subtle">
+      <div class="d-flex justify-content-between align-items-center">
+        <span class="small fw-bold text-uppercase text-muted"><i class="bi bi-geo-alt me-2"></i>Inventário de Fazendas Ativas</span>
+        <span class="badge bg-secondary-subtle text-secondary fw-normal" style="font-size: 0.65rem;">Base Estrutural Geográfica</span>
+      </div>
+    </div>
+
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-scientific table-hover m-0 align-middle">
+          <thead>
+            <tr class="bg-dark" style="border-bottom: 2px solid var(--border-color);">
+              <th class="ps-4 py-3" style="width: 35%;">NOME DA PROPRIEDADE</th>
+              <th style="width: 30%;">LOCALIZAÇÃO (CIDADE/UF)</th>
+              <th style="width: 20%;">QTD. DE TALHÕES</th>
+              <th class="text-end pe-4" style="width: 15%;">AÇÕES</th>
+            </tr>
+          </thead>
+          <tbody class="border-top-0 text-light">
+            {% for fazenda in fazendas %}
+              <tr>
+                <td class="ps-4 py-3 fw-bold">🏡 {{ fazenda.nome }}</td>
+                <td>{{ fazenda.municipio }} - {{ fazenda.estado }}</td>
+                <td>
+                  <span class="badge bg-secondary-subtle text-light">{{ fazenda.talhao_set.count|default:'0' }} Talhões</span>
+                </td>
+                <td class="text-end pe-4">
+                  <a href="{% url 'novo_talhao' %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-plus"></i> Talhão</a>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="4" class="py-5">
+                  <div class="text-center">
+                    <i class="bi bi-map text-muted h1 d-block mb-3 opacity-25"></i>
+                    <span class="text-muted small text-uppercase fw-bold">Nenhum registro encontrado na base de dados.</span>
+                    <p class="text-muted small mt-2">Cadastre a primeira unidade para habilitar o registro de pontos espaciais.</p>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card-footer bg-dark-subtle border-top border-secondary-subtle py-2">
+      <div class="d-flex justify-content-between align-items-center">
+        <small class="text-muted" style="font-size: 0.65rem;">
+          <i class="bi bi-shield-check me-1 text-success"></i>
+          Integridade territorial validada.
+        </small>
+        <small class="text-muted font-monospace" style="font-size: 0.65rem;">Total: {{ fazendas|length }} propriedades</small>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Estilização para o estado de Hover da Tabela */
+    .table-hover tbody tr:hover {
+      background-color: rgba(88, 166, 255, 0.05) !important;
+      cursor: default;
+    }
+    
+    /* Ajuste de badges */
+    .badge {
+      font-weight: 500;
+      padding: 0.35em 0.65em;
+    }
+  </style>
+{% endblock %}

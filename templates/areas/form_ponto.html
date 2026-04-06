@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mb-3 align-items-center">
+    <div class="col-md-8">
+        <h5 class="text-uppercase fw-bold mb-1" style="color: var(--accent-primary); letter-spacing: 1px; font-size: 0.8rem;">
+            Módulo de Aquisição Geográfica
+        </h5>
+        <h2 class="fw-bold m-0 text-light">Registrar Ponto de Sondagem</h2>
+    </div>
+    <div class="col-md-4 text-end">
+        <span class="badge bg-dark-subtle border border-secondary-subtle text-muted px-3 py-2">
+            <i class="bi bi-broadcast me-2"></i>Sincronização PostGIS Ativa
+        </span>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <div class="card card-scientific h-100">
+            <div class="card-header py-3">
+                <span class="small fw-bold text-uppercase">Parâmetros da Amostra</span>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Unidade de Manejo (Talhão)</label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-dark border-secondary-subtle text-muted"><i class="bi bi-layers"></i></span>
+                            {{ form.talhao }}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Identificador do Ponto</label>
+                        {{ form.identificador }}
+                        <div class="form-text" style="font-size: 0.7rem;">Ex: P-001, FURO-A2</div>
+                    </div>
+
+                    <div style="display:none;">
+                        {{ form.coordenadas }}
+                    </div>
+                    
+                    <div id="telemetria-coord" class="p-3 rounded bg-black border border-secondary-subtle mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="small text-uppercase text-muted fw-bold" style="font-size: 0.65rem;">Status do GPS</span>
+                            <span id="gps-status" class="badge bg-danger-subtle text-danger px-2" style="font-size: 0.6rem;">AGUARDANDO CLIQUE</span>
+                        </div>
+                        <div class="font-monospace text-primary mb-1" style="font-size: 0.85rem;" id="lat-display">LAT: --.----</div>
+                        <div class="font-monospace text-primary" style="font-size: 0.85rem;" id="lng-display">LNG: --.----</div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-sm btn-primary fw-bold py-2 shadow-sm" id="btn-salvar" disabled>
+                            <i class="bi bi-pin-map-fill me-2"></i>FIXAR COORDENADA
+                        </button>
+                        <a href="{% url 'dashboard' %}" class="btn btn-sm btn-outline-secondary border-secondary-subtle py-2">
+                            CANCELAR
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card card-scientific overflow-hidden h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span class="small fw-bold text-uppercase"><i class="bi bi-geo-fill me-2"></i>Seletor Espacial de Satélite</span>
+                <span class="text-muted small" style="font-size: 0.7rem;">Precisão: ± 1.2m</span>
+            </div>
+            <div class="card-body p-0" style="min-height: 550px;">
+                <div id="mapa-cadastro" style="height: 100%; width: 100%; filter: contrast(110%) brightness(90%);"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Inicialização do mapa com foco técnico
+    var map = L.map('mapa-cadastro', {
+        zoomControl: false,
+        attributionControl: false
+    }).setView([-15.7801, -47.9292], 4);
+
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+    // Camada Esri World Imagery (Satélite Profissional)
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19
+    }).addTo(map);
+
+    var marcadorAtual = null;
+    var inputCoordenadas = document.querySelector('textarea[name="coordenadas"]') || document.getElementById('id_coordenadas');
+    var btnSalvar = document.getElementById('btn-salvar');
+    var gpsStatus = document.getElementById('gps-status');
+    var latDisplay = document.getElementById('lat-display');
+    var lngDisplay = document.getElementById('lng-display');
+
+    // Ícone de Mira de Precisão (Crosshair)
+    var crosshairIcon = L.divIcon({
+        className: 'custom-crosshair',
+        html: `
+            <div style="position: relative; width: 40px; height: 40px; margin-top: -20px; margin-left: -20px;">
+                <div style="position: absolute; top: 20px; left: 0; width: 40px; height: 2px; background: #58a6ff;"></div>
+                <div style="position: absolute; left: 20px; top: 0; width: 2px; height: 40px; background: #58a6ff;"></div>
+                <div style="position: absolute; top: 15px; left: 15px; width: 10px; height: 10px; border: 2px solid white; border-radius: 50%;"></div>
+            </div>`,
+        iconSize: [40, 40],
+        iconAnchor: [20, 20]
+    });
+
+    // Evento de Clique no Mapa
+    map.on('click', function(e) {
+        var lat = e.latlng.lat;
+        var lng = e.latlng.lng;
+
+        if (marcadorAtual) {
+            map.removeLayer(marcadorAtual);
+        }
+
+        marcadorAtual = L.marker([lat, lng], {icon: crosshairIcon}).addTo(map);
+
+        // Formatação WKT para PostGIS (Longitude Latitude)
+        inputCoordenadas.value = `POINT(${lng} ${lat})`;
+        
+        // Atualização da Telemetria Visual
+        latDisplay.innerText = `LAT: ${lat.toFixed(7)}°`;
+        lngDisplay.innerText = `LNG: ${lng.toFixed(7)}°`;
+        
+        gpsStatus.className = "badge bg-success text-white px-2";
+        gpsStatus.innerText = "COORDENADA CAPTURADA";
+        
+        latDisplay.classList.add('text-success');
+        lngDisplay.classList.add('text-success');
+        
+        btnSalvar.disabled = false;
+        
+        // Pequeno efeito de pulso no botão
+        btnSalvar.classList.add('btn-primary');
+        btnSalvar.classList.remove('btn-outline-primary');
+    });
+</script>
+
+<style>
+    /* Ajuste para inputs do Django Forms herderem estilo Bootstrap Dark */
+    select, input[type="text"], input[type="number"], textarea {
+        background-color: var(--bg-base) !important;
+        border: 1px solid var(--border-color) !important;
+        color: var(--text-main) !important;
+        font-size: 0.85rem !important;
+        padding: 0.4rem !important;
+        border-radius: 4px !important;
+    }
+    select:focus, input:focus {
+        border-color: var(--accent-primary) !important;
+        box-shadow: 0 0 0 0.2rem rgba(88, 166, 255, 0.25) !important;
+        outline: none;
+    }
+</style>
+{% endblock %}

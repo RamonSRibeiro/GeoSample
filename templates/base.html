@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoSample Analytics | Sistema de Custódia</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        /* Paleta Científica e Minimalista (High Contrast Dark Mode) */
+        :root {
+            --bg-base: #0d1117;        /* Fundo principal (Grafite escuro) */
+            --bg-panel: #161b22;       /* Fundo de painéis e navbar */
+            --border-color: #30363d;   /* Divisórias secas */
+            --text-main: #c9d1d9;      /* Texto de alta legibilidade */
+            --text-muted: #8b949e;     /* Texto secundário */
+            --accent-primary: #58a6ff; /* Azul clínico para interações */
+            
+            --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: var(--font-ui);
+            font-size: 0.9rem;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Estruturação da Barra de Navegação */
+        .navbar-custom {
+            background-color: var(--bg-panel);
+            border-bottom: 1px solid var(--border-color);
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+
+        .navbar-custom .navbar-brand {
+            color: var(--text-main);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            font-size: 1.1rem;
+        }
+
+        .navbar-custom .nav-link {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05rem;
+            transition: color 0.2s ease-in-out;
+        }
+
+        .navbar-custom .nav-link:hover, 
+        .navbar-custom .nav-link.active {
+            color: var(--accent-primary);
+        }
+
+        /* Containers de Dados (Substituindo card-agro por card-scientific) */
+        .card-scientific {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-shadow: none;
+            margin-bottom: 1rem;
+        }
+
+        .card-scientific .card-header {
+            background-color: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        /* Otimização de Tabelas de Dados */
+        .table-scientific {
+            font-size: 0.85rem;
+            color: var(--text-main);
+        }
+        
+        .table-scientific th {
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--border-color);
+        }
+    </style>
+</head>
+
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    
+    {% csrf_token %}
+
+    <nav class="navbar navbar-expand-lg navbar-custom mb-4">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand" href="{% url 'dashboard' %}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-geo-alt me-2" viewBox="0 0 16 16" style="color: var(--accent-primary);">
+                    <path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A31.493 31.493 0 0 1 8 14.58a31.481 31.481 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94zM8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10z"/>
+                    <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                </svg>
+                GeoSample Analytics
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'lista_amostras' %}">Custódia Lab</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/admin">Administração do Sistema</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-4">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% load l10n %}
+
+{% block content %}
+<div class="row mb-4 align-items-end">
+    <div class="col-md-7">
+        <h5 class="text-uppercase fw-bold mb-1" style="color: var(--accent-primary); letter-spacing: 1px; font-size: 0.8rem;">
+            Terminal de Monitoramento
+        </h5>
+        <h2 class="fw-bold m-0">Visão Geral de Campo</h2>
+    </div>
+    <div class="col-md-5 text-end">
+        <div class="btn-group shadow-sm" role="group">
+            <a href="{% url 'nova_fazenda' %}" class="btn btn-sm btn-outline-secondary border-secondary-subtle">
+                + Fazenda
+            </a>
+            <a href="{% url 'novo_talhao' %}" class="btn btn-sm btn-outline-secondary border-secondary-subtle">
+                + Talhão
+            </a>
+            <a href="{% url 'novo_ponto' %}" class="btn btn-sm btn-outline-secondary border-secondary-subtle">
+                + Ponto
+            </a>
+            <a href="{% url 'nova_amostra' %}" class="btn btn-sm btn-primary px-3">
+                Nova Amostra
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card card-scientific p-3">
+            <div class="text-muted small text-uppercase fw-semibold mb-1">Unidades Geográficas</div>
+            <div class="h3 fw-bold m-0" style="font-family: var(--font-mono);">{{ total_fazendas }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-scientific p-3">
+            <div class="text-muted small text-uppercase fw-semibold mb-1">Custódia Ativa</div>
+            <div class="h3 fw-bold m-0 text-warning" style="font-family: var(--font-mono);">{{ amostras_em_processo }}</div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card card-scientific p-3 d-flex flex-row align-items-center justify-content-between h-100">
+            <div>
+                <div class="text-muted small text-uppercase fw-semibold">Infraestrutura PostGIS</div>
+                <div class="small text-success"><span class="badge bg-success-subtle text-success p-1 me-1">●</span> Operacional</div>
+            </div>
+            <div class="text-end">
+                <code class="text-muted small" style="font-size: 0.7rem;">RTT: 24ms</code>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card card-scientific overflow-hidden">
+            <div class="card-header d-flex justify-content-between align-items-center py-2">
+                <span class="small fw-bold text-uppercase" style="font-size: 0.75rem;">
+                    <i class="bi bi-layers me-2 text-primary"></i>Monitoramento Geográfico
+                </span>
+                <span class="badge bg-dark-subtle text-muted fw-normal" style="font-size: 0.6rem;">ESRI SATELLITE</span>
+            </div>
+            <div class="card-body p-0">
+                <div id="mapa" style="height: 350px; width: 100%; filter: contrast(105%) brightness(90%);"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card card-scientific">
+            <div class="card-header d-flex justify-content-between align-items-center py-3">
+                <span class="text-uppercase small fw-bold">Registro de Fluxo Analítico</span>
+                <div class="text-muted small" style="font-size: 0.7rem;">Sincronização HTMX Ativa</div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-scientific table-hover m-0 align-middle">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">UID Amostra</th>
+                                <th>Localização (Ponto)</th>
+                                <th>Estágio Atual</th>
+                                <th>Responsável</th>
+                                <th class="text-end pe-4">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody class="border-top-0">
+                            {% for amostra in amostras %}
+                                {% include 'partials/amostra_linha.html' %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Inicialização do mapa com foco em usabilidade desktop
+    var map = L.map('mapa', {
+        zoomControl: false,
+        scrollWheelZoom: false // Evita scroll acidental ao navegar na página
+    }).setView([-15.7801, -47.9292], 4);
+
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Esri'
+    }).addTo(map);
+
+    // Ajuste dinâmico de marcadores
+    {% for ponto in pontos_coleta %}
+        var lat = {{ ponto.coordenadas.y|unlocalize }};
+        var lng = {{ ponto.coordenadas.x|unlocalize }};
+        
+        var markerIcon = L.divIcon({
+            className: 'custom-div-icon',
+            html: "<div style='background-color: var(--accent-primary); width: 10px; height: 10px; border: 2px solid white; border-radius: 50%; shadow: 0 0 5px rgba(0,0,0,0.5);'></div>",
+            iconSize: [10, 10],
+            iconAnchor: [5, 5]
+        });
+
+        var marker = L.marker([lat, lng], {icon: markerIcon}).addTo(map);
+        marker.bindPopup(`
+            <div class="p-1" style="font-family: var(--font-mono); font-size: 0.75rem;">
+                <strong>{{ ponto.identificador }}</strong><br>
+                <span class="text-muted">{{ ponto.talhao.codigo_talhao }}</span>
+            </div>
+        `);
+    {% endfor %}
+
+    // Garante que o mapa utilize 100% da nova altura após o render
+    setTimeout(function(){ map.invalidateSize(); }, 200);
+</script>
+{% endblock %}

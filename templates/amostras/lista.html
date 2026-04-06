@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-md-7">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}" class="text-muted text-decoration-none">Início</a></li>
+                <li class="breadcrumb-item active text-primary" aria-current="page">Log de Amostras</li>
+            </ol>
+        </nav>
+        <h2 class="fw-bold m-0 text-light">Gestão de Cadeia de Custódia</h2>
+        <p class="text-muted small mb-0">Monitoramento em tempo real de amostras georreferenciadas</p>
+    </div>
+    <div class="col-md-5 text-end">
+        <a href="{% url 'nova_amostra' %}" class="btn btn-sm btn-primary px-3 fw-bold shadow-sm">
+            <i class="bi bi-plus-circle me-2"></i>REGISTRAR NOVA AMOSTRA
+        </a>
+    </div>
+</div>
+
+<div class="card card-scientific shadow-lg">
+    <div class="card-header bg-dark-subtle py-3 border-bottom border-secondary-subtle">
+        <div class="d-flex justify-content-between align-items-center">
+            <span class="small fw-bold text-uppercase text-muted">
+                <i class="bi bi-list-columns-reverse me-2"></i>Inventário de Amostras Ativas
+            </span>
+            <span class="badge bg-secondary-subtle text-secondary fw-normal" style="font-size: 0.65rem;">
+                Sincronizado com GeoDatabase
+            </span>
+        </div>
+    </div>
+    
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-scientific table-hover m-0 align-middle">
+                <thead>
+                    <tr class="bg-dark" style="border-bottom: 2px solid var(--border-color);">
+                        <th class="ps-4 py-3" style="width: 15%;">UID / CÓDIGO</th>
+                        <th style="width: 20%;">PONTO DE ORIGEM</th>
+                        <th style="width: 15%;">ESTÁGIO ATUAL</th>
+                        <th style="width: 25%;">BANCADA / SETOR</th>
+                        <th class="text-end pe-4" style="width: 25%;">CONTROLES DE FLUXO</th>
+                    </tr>
+                </thead>
+                <tbody class="border-top-0">
+                    {% for amostra in amostras %}
+                        {% include 'partials/amostra_linha.html' %}
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" class="py-5">
+                                <div class="text-center">
+                                    <i class="bi bi-inbox text-muted h1 d-block mb-3 opacity-25"></i>
+                                    <span class="text-muted small text-uppercase fw-bold">Nenhum registro encontrado na base de dados.</span>
+                                    <p class="text-muted small mt-2">Inicie uma nova coleta para popular o sistema.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div class="card-footer bg-dark-subtle border-top border-secondary-subtle py-2">
+        <div class="d-flex justify-content-between align-items-center">
+            <small class="text-muted" style="font-size: 0.65rem;">
+                <i class="bi bi-shield-check me-1 text-success"></i>
+                Integridade de dados verificada via logs de transição.
+            </small>
+            <small class="text-muted font-monospace" style="font-size: 0.65rem;">
+                Total: {{ amostras|length }} registros
+            </small>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Estilização para o estado de Hover da Tabela */
+    .table-hover tbody tr:hover {
+        background-color: rgba(88, 166, 255, 0.03) !important;
+        cursor: default;
+    }
+
+    /* Ajuste de badges para maior sobriedade */
+    .badge {
+        font-weight: 500;
+        padding: 0.35em 0.65em;
+    }
+</style>
+{% endblock %}
