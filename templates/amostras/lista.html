@@ -16,6 +16,9 @@
         <a href="{% url 'nova_amostra' %}" class="btn btn-sm btn-primary px-3 fw-bold shadow-sm">
             <i class="bi bi-plus-circle me-2"></i>REGISTRAR NOVA AMOSTRA
         </a>
+        <a href="{% url 'exportar_laudos' %}" class="btn btn-sm btn-outline-success px-3 fw-bold shadow-sm me-2">
+            <i class="bi bi-file-earmark-spreadsheet me-2"></i>EXPORTAR DADOS (XLS)
+        </a>
     </div>
 </div>
 
@@ -45,7 +48,31 @@
                 </thead>
                 <tbody class="border-top-0">
                     {% for amostra in amostras %}
-                        {% include 'partials/amostra_linha.html' %}
+                        <tr>
+                            <td class="ps-4 font-monospace text-light">{{ amostra.codigo_rastreio }}</td>
+                            <td class="text-muted">{{ amostra.ponto_origem }}</td>
+                            <td>
+                                <span class="badge bg-dark border border-secondary-subtle text-light">
+                                    {{ amostra.get_status_display }}
+                                </span>
+                            </td>
+                            <td class="text-muted">{{ amostra.localizacao_bancada|default:"Não Alocado" }}</td>
+                            <td class="text-end pe-4">
+                                {% if amostra.status == 'FI' %}
+                                    <a href="{% url 'gerar_laudo_pdf' amostra.id %}" target="_blank" class="btn btn-sm btn-outline-danger py-0 px-2 fw-bold shadow-sm" style="font-size: 0.7rem;">
+                                        <i class="bi bi-filetype-pdf me-1"></i>LAUDO
+                                    </a>
+                                {% elif amostra.amostra_vencida %}
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle" style="font-size: 0.65rem;">
+                                        <i class="bi bi-exclamation-triangle me-1"></i>ATRASADA
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.65rem;">
+                                        <i class="bi bi-arrow-repeat me-1"></i>EM FLUXO
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
                     {% empty %}
                         <tr>
                             <td colspan="5" class="py-5">
@@ -76,13 +103,11 @@
 </div>
 
 <style>
-    /* Estilização para o estado de Hover da Tabela */
     .table-hover tbody tr:hover {
         background-color: rgba(88, 166, 255, 0.03) !important;
         cursor: default;
     }
 
-    /* Ajuste de badges para maior sobriedade */
     .badge {
         font-weight: 500;
         padding: 0.35em 0.65em;

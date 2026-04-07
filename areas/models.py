@@ -19,10 +19,22 @@ class Talhao(models.Model):
         return f"{self.fazenda.nome} - {self.codigo_talhao}"
 
 class PontoSondagem(models.Model):
+    # Definimos as opções de forma organizada aqui dentro
+    class TipoMatriz(models.TextChoices):
+        SOLO = 'SO', 'Solo (Agronômica/Pedologia)'
+        AGUA = 'AG', 'Água (Hidrologia/Qualidade)'
+
     talhao = models.ForeignKey(Talhao, on_delete=models.CASCADE, related_name='pontos')
     identificador = models.CharField(max_length=50, help_text="Ex: Ponto 01")
     
-    # Campo Geoespacial: Armazena a exata Latitude e Longitude
+    # Única declaração do campo
+    tipo_matriz = models.CharField(
+        max_length=2,
+        choices=TipoMatriz.choices,
+        default=TipoMatriz.SOLO,
+        verbose_name="Tipo de Matriz Coletada"
+    )
+    
     coordenadas = models.PointField(srid=4326, help_text="Coordenadas geográficas da extração")
     data_marcacao = models.DateTimeField(auto_now_add=True)
 

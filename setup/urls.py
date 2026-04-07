@@ -20,12 +20,14 @@ from areas.views import dashboard
 from amostras.views import atualizar_status_amostra, AmostraListView, AmostraCreateView
 from analises.views import registrar_analise
 from areas.views import dashboard, FazendaListView, FazendaCreateView, PontoSondagemCreateView, TalhaoCreateView
+from amostras.views import exportar_laudos_excel
+from amostras.views import gerar_laudo_pdf
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', dashboard, name='dashboard'),
     path('amostras/atualizar-status/<int:amostra_id>/', atualizar_status_amostra, name='atualizar_status_amostra'), # <--- Rota da página inicial
-
     path('amostras/', AmostraListView.as_view(), name='lista_amostras'),
     path('amostras/nova/', AmostraCreateView.as_view(), name='nova_amostra'),
     path('amostras/atualizar-status/<int:amostra_id>/', atualizar_status_amostra, name='atualizar_status_amostra'),
@@ -33,6 +35,8 @@ urlpatterns = [
     path('fazendas/', FazendaListView.as_view(), name='lista_fazendas'),
     path('fazendas/nova/', FazendaCreateView.as_view(), name='nova_fazenda'),
     path('pontos/novo/', PontoSondagemCreateView.as_view(), name='novo_ponto'),
-    path('talhoes/novo/', TalhaoCreateView.as_view(), name='novo_talhao')
+    path('talhoes/novo/', TalhaoCreateView.as_view(), name='novo_talhao'),
+    path('exportar-laudos/', exportar_laudos_excel, name='exportar_laudos'),
+    path('amostra/<str:amostra_id>/laudo-pdf/', gerar_laudo_pdf, name='gerar_laudo_pdf')
 
 ]

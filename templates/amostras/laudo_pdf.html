@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Laudo Técnico - {{ amostra.codigo_rastreio }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 1.2cm;
+        }
+
+        body {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 10pt;
+            color: #1a1a1a; /* Preto quase puro para leitura */
+            background-color: #ffffff;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        /* Cores de Identidade */
+        .text-navy { color: #002347; } /* Azul Marinho */
+        .bg-navy { background-color: #002347; color: #ffffff; }
+
+        /* Cabeçalho Profissional */
+        .header {
+            border-bottom: 2px solid #002347;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .header-left h1 {
+            font-size: 22pt;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -1px;
+        }
+
+        .header-left p {
+            font-size: 9pt;
+            margin: 2px 0 0 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #4b5563;
+        }
+
+        .header-right {
+            text-align: right;
+            font-size: 8pt;
+            color: #6b7280;
+        }
+
+        /* Títulos de Seção Estilo Científico */
+        .section-title {
+            background-color: #f3f4f6;
+            border-left: 4px solid #002347;
+            padding: 5px 10px;
+            font-size: 10pt;
+            font-weight: 700;
+            color: #002347;
+            text-transform: uppercase;
+            margin: 20px 0 10px 0;
+        }
+
+        /* Tabelas de Dados */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        th, td {
+            padding: 8px 10px;
+            border: 1px solid #e5e7eb;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f9fafb;
+            color: #374151;
+            font-weight: 600;
+            font-size: 8.5pt;
+        }
+
+        .label-cell {
+            background-color: #f9fafb;
+            font-weight: 600;
+            width: 20%;
+            color: #4b5563;
+        }
+
+        .value-cell {
+            width: 30%;
+        }
+
+        /* Grade de Resultados Analíticos */
+        .results-table {
+            text-align: center;
+        }
+
+        .results-table th {
+            text-align: center;
+            background-color: #002347;
+            color: #ffffff;
+            border: 1px solid #002347;
+        }
+
+        .results-table td {
+            text-align: center;
+            font-weight: 700;
+            font-size: 11pt;
+        }
+
+        .unit-label {
+            font-size: 7pt;
+            font-weight: normal;
+            display: block;
+            color: #cbd5e1;
+        }
+
+        /* Assinatura e Rodapé */
+        .signature-container {
+            margin-top: 50px;
+            text-align: center;
+        }
+
+        .sig-line {
+            width: 250px;
+            border-top: 1px solid #1a1a1a;
+            margin: 0 auto 5px auto;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 7.5pt;
+            color: #9ca3af;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 10px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 8pt;
+            background-color: #e5e7eb;
+            color: #374151;
+        }
+
+        /* Forçar quebra de página se necessário */
+        .page-break { page-break-before: always; }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="header-left">
+            <h1 class="text-navy">GEOSAMPLE ANALYTICS</h1>
+            <p>Laboratório de Análises de Solo e Tecido Vegetal</p>
+        </div>
+        <div class="header-right">
+            <strong>LAUDO TÉCNICO Nº:</strong> {{ amostra.codigo_rastreio }}<br>
+            <strong>EMISSÃO:</strong> {% now "d/m/Y H:i" %}
+        </div>
+    </div>
+
+    <div class="section-title">I. Identificação e Rastreabilidade</div>
+    <table>
+        <tr>
+            <td class="label-cell">Código (UID)</td>
+            <td class="value-cell"><strong>{{ amostra.codigo_rastreio }}</strong></td>
+            <td class="label-cell">Status</td>
+            <td class="value-cell"><span class="badge">{{ amostra.get_status_display }}</span></td>
+        </tr>
+        <tr>
+            <td class="label-cell">Matriz/Tipo</td>
+            <td class="value-cell">{{ amostra.ponto_origem.get_tipo_matriz_display }}</td>
+            <td class="label-cell">Data da Coleta</td>
+            <td class="value-cell">{{ amostra.data_coleta|date:"d/m/Y H:i" }}</td>
+        </tr>
+    </table>
+
+    <div class="section-title">II. Informações de Origem</div>
+    <table>
+        <tr>
+            <td class="label-cell">Propriedade</td>
+            <td class="value-cell">{{ amostra.ponto_origem.talhao.fazenda.nome }}</td>
+            <td class="label-cell">Talhão</td>
+            <td class="value-cell">{{ amostra.ponto_origem.talhao.codigo_talhao }}</td>
+        </tr>
+        <tr>
+            <td class="label-cell">Ponto/ID</td>
+            <td class="value-cell">{{ amostra.ponto_origem.identificador }}</td>
+            <td class="label-cell">Coordenadas</td>
+            <td class="value-cell" style="font-family: monospace; font-size: 9pt;">
+                Lat: {{ amostra.ponto_origem.coordenadas.y|floatformat:6 }} / 
+                Long: {{ amostra.ponto_origem.coordenadas.x|floatformat:6 }}
+            </td>
+        </tr>
+    </table>
+
+    <div class="section-title">III. Resultados Analíticos (Química)</div>
+
+    {% if analise %}
+    <table class="results-table">
+        <thead>
+            <tr>
+                <th>P <span class="unit-label">mg/dm³</span></th>
+                <th>K <span class="unit-label">cmolc/dm³</span></th>
+                <th>Ca <span class="unit-label">cmolc/dm³</span></th>
+                <th>Mg <span class="unit-label">cmolc/dm³</span></th>
+                <th>H+Al <span class="unit-label">cmolc/dm³</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ analise.p|default:"-" }}</td>
+                <td>{{ analise.k|default:"-" }}</td>
+                <td>{{ analise.ca|default:"-" }}</td>
+                <td>{{ analise.mg|default:"-" }}</td>
+                <td>{{ analise.h_al|default:"-" }}</td>
+            </tr>
+        </tbody>
+    </table>
+    
+
+    <div class="section-title">IV. Análise Física e Índices</div>
+    <table class="results-table">
+        <thead>
+            <tr>
+                <th style="background-color: #4b5563; border-color: #4b5563;">Argila <span class="unit-label">%</span></th>
+                <th style="background-color: #4b5563; border-color: #4b5563;">Silte <span class="unit-label">%</span></th>
+                <th style="background-color: #4b5563; border-color: #4b5563;">Areia <span class="unit-label">%</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ analise.argila|default:"-" }}</td>
+                <td>{{ analise.silte|default:"-" }}</td>
+                <td>{{ analise.areia|default:"-" }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <pdf:nextpage />
+
+    <table class="results-table">
+        <thead>
+            <tr>
+                <th style="background-color: #374151; border-color: #374151;">SB <span class="unit-label">Soma de Bases</span></th>
+                <th style="background-color: #374151; border-color: #374151;">CTC <span class="unit-label">Capacidade Troca</span></th>
+                <th style="background-color: #374151; border-color: #374151;">V% <span class="unit-label">Saturação</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ analise.soma_bases|floatformat:2|default:"-" }}</td>
+                <td>{{ analise.ctc|floatformat:2|default:"-" }}</td>
+                <td>{{ analise.v_porcento|floatformat:1|default:"-" }}%</td>
+            </tr>
+        </tbody>
+    </table>
+    {% else %}
+    <p style="text-align: center; padding: 20px; color: #6b7280; font-style: italic; border: 1px dashed #ccc;">
+        Resultados analíticos em fase de processamento.
+    </p>
+    {% endif %}
+
+    <div class="signature-container">
+        <div class="sig-line"></div>
+        <strong class="text-navy">Departamento Técnico Responsável</strong><br>
+        <span style="font-size: 8pt; color: #6b7280;">Documento assinado eletronicamente conforme normas ISO/IEC 17025</span>
+    </div>
+
+    <div class="footer">
+        GeoSample Analytics - Sistema de Gestão de Informações Laboratoriais (LIMS)<br>
+        A reprodução parcial deste laudo não é permitida sem autorização prévia do laboratório.
+    </div>
+
+</body>
+</html>

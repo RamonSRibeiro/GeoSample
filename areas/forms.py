@@ -19,10 +19,14 @@ class PontoSondagemForm(forms.ModelForm):
 
     class Meta:
         model = PontoSondagem
-        fields = ['talhao', 'identificador', 'coordenadas']
+        # 1. Adicionamos o 'tipo_matriz' aqui na lista de campos
+        fields = ['talhao', 'identificador', 'tipo_matriz', 'coordenadas'] 
+        
         widgets = {
             'talhao': forms.Select(attrs={'class': 'form-select'}),
             'identificador': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex: Ponto 01'}),
+            # 2. Adicionamos o estilo Bootstrap para a caixinha de seleção
+            'tipo_matriz': forms.Select(attrs={'class': 'form-select'}),
         }
 
 class TalhaoForm(forms.ModelForm):

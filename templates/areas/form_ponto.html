@@ -39,6 +39,12 @@
                         <div class="form-text" style="font-size: 0.7rem;">Ex: P-001, FURO-A2</div>
                     </div>
 
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Matriz Ambiental</label>
+                        {{ form.tipo_matriz }}
+                        <div class="form-text" style="font-size: 0.7rem;">Define os parâmetros laboratoriais da amostra</div>
+                    </div>
+
                     <div style="display:none;">
                         {{ form.coordenadas }}
                     </div>
@@ -113,6 +119,7 @@
         iconSize: [40, 40],
         iconAnchor: [20, 20]
     });
+    
 
     // Evento de Clique no Mapa
     map.on('click', function(e) {
